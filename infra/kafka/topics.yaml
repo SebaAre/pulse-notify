@@ -1,0 +1,43 @@
+# Kafka topic definitions
+# Applied via: scripts/kafka-topics.sh
+# On AWS MSK: use AWS CLI or Terraform MSK topic resource
+
+topics:
+
+  - name: notification.requested
+    partitions: 12
+    replication-factor: 3
+    config:
+      retention.ms: 604800000   # 7 days
+      cleanup.policy: delete
+
+  - name: notification.processed
+    partitions: 12
+    replication-factor: 3
+    config:
+      retention.ms: 604800000
+
+  - name: delivery.attempted
+    partitions: 12
+    replication-factor: 3
+    config:
+      retention.ms: 604800000
+
+  - name: delivery.completed
+    partitions: 12
+    replication-factor: 3
+    config:
+      retention.ms: 604800000
+
+  - name: delivery.failed
+    partitions: 12
+    replication-factor: 3
+    config:
+      retention.ms: 2592000000  # 30 days — retained longer for replay/investigation
+
+  # Dead-letter topics
+  - name: delivery.failed.dlq
+    partitions: 3
+    replication-factor: 3
+    config:
+      retention.ms: 2592000000

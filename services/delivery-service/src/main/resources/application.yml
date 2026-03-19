@@ -1,0 +1,41 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: delivery-service
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+    consumer:
+      group-id: delivery-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+aws:
+  region: ${AWS_REGION:us-east-1}
+  sns:
+    platform-application-arn: ${SNS_PLATFORM_ARN:}
+  ses:
+    from-address: ${SES_FROM_ADDRESS:noreply@pulsenotify.io}
+  sqs:
+    webhook-queue-url: ${SQS_WEBHOOK_QUEUE_URL:}
+  # For local dev, point to LocalStack
+  endpoint-override: ${AWS_ENDPOINT_OVERRIDE:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    com.pulsenotify: INFO
