@@ -99,7 +99,7 @@ npm run dev           # Dev server on http://localhost:5173
 
 | Tool        | URL                    | Credentials      |
 |-------------|------------------------|------------------|
-| Grafana     | http://localhost:3000  | admin / admin    |
+| Grafana     | http://localhost:3000  | see `.env`       |
 | Prometheus  | http://localhost:9090  | —                |
 | Loki        | http://localhost:3100  | —                |
 
