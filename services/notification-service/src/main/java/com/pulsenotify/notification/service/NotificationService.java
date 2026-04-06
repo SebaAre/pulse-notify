@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.pulsenotify.events.NotificationRequestedEvent;
 import com.pulsenotify.notification.dto.NotificationRequest;
 import com.pulsenotify.notification.dto.NotificationResponse;
+import com.pulsenotify.notification.exception.NotificationNotFoundException;
 import com.pulsenotify.notification.model.Notification;
 import com.pulsenotify.notification.model.NotificationStatus;
 import com.pulsenotify.notification.repository.NotificationRepository;
@@ -51,7 +52,7 @@ public class NotificationService {
 
 
     public NotificationResponse getNotificationById(UUID id) {
-        Notification notification = notificationRepository.findById(id).orElseThrow(() -> new RuntimeException("Notification not found"));
+        Notification notification = notificationRepository.findById(id).orElseThrow(() -> new NotificationNotFoundException(id));
     
         return toResponse(notification);
     }
