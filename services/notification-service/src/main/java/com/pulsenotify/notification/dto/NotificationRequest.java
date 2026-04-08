@@ -11,7 +11,7 @@ public record NotificationRequest(
     @NotBlank(message = "Recipient is required")
     String recipient, 
     
-    @Size(min = 3, max = 100)
+    @Size(max = 255, message = "Subject must not exceed 255 characters")
     String subject, 
     
     @NotNull(message = "Notification channel is required")
