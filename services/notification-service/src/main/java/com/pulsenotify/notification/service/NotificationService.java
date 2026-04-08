@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.pulsenotify.events.NotificationRequestedEvent;
 import com.pulsenotify.notification.dto.NotificationRequest;
@@ -23,6 +24,7 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final KafkaTemplate<String, NotificationRequestedEvent> kafkaTemplate;
     
+    @Transactional
     public NotificationResponse sendNotification(NotificationRequest request) {
 
         Notification notification = Notification.builder()
@@ -50,13 +52,14 @@ public class NotificationService {
 
     }
 
-
+    @Transactional(readOnly = true)
     public NotificationResponse getNotificationById(UUID id) {
         Notification notification = notificationRepository.findById(id).orElseThrow(() -> new NotificationNotFoundException(id));
     
         return toResponse(notification);
     }
 
+    @Transactional(readOnly = true)
     public List<NotificationResponse> getNotificationsByRecipient(String recipient) {
 
         return notificationRepository.findByRecipient(recipient)
