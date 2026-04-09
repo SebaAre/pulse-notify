@@ -5,11 +5,16 @@ import com.pulsenotify.template.dto.TemplateResponse;
 import com.pulsenotify.template.exception.TemplateNotFoundException;
 import com.pulsenotify.template.model.NotificationTemplate;
 import com.pulsenotify.template.repository.TemplateRepository;
+
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.StringWriter;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -17,6 +22,7 @@ import java.util.UUID;
 public class TemplateService {
 
     private final TemplateRepository templateRepository;
+    private final Configuration freemarkerConfig;
 
     @Transactional
     public TemplateResponse create(TemplateRequest request) {
@@ -65,6 +71,24 @@ public class TemplateService {
         }
         templateRepository.deleteById(id);
     }
+
+    @Transactional(readOnly = true)
+    public String render(UUID id, Map<String, Object> variables) {
+        NotificationTemplate template = templateRepository.findById(id)
+                .orElseThrow(() -> new TemplateNotFoundException(id));
+
+        try {
+            Template freemarkerTemplate = new Template(id.toString(), template.getBody(), freemarkerConfig);
+            
+            StringWriter writer = new StringWriter();
+            freemarkerTemplate.process(variables, writer);
+            
+            return writer.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to render template: " + e.getMessage(), e);
+        }
+    }
+
 
     private TemplateResponse toResponse(NotificationTemplate template) {
         return new TemplateResponse(
