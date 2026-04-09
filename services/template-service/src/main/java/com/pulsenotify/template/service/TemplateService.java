@@ -50,16 +50,12 @@ public class TemplateService {
         NotificationTemplate existing = templateRepository.findById(id)
                 .orElseThrow(() -> new TemplateNotFoundException(id));
 
-        NotificationTemplate updated = NotificationTemplate.builder()
-                .id(existing.getId())
-                .name(request.name())
-                .channel(request.channel())
-                .subject(request.subject())
-                .body(request.body())
-                .createdAt(existing.getCreatedAt())
-                .build();
+        existing.setName(request.name());
+        existing.setChannel(request.channel());
+        existing.setSubject(request.subject());
+        existing.setBody(request.body());
 
-        return toResponse(templateRepository.save(updated));
+        return toResponse(templateRepository.save(existing));
     }
 
     @Transactional

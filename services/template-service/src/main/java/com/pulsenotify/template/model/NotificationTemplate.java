@@ -19,6 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "notification_templates", schema = "template")
@@ -32,16 +33,20 @@ public class NotificationTemplate {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Setter
     @Column(nullable = false, unique = true)
     private String name;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private NotificationChannel channel;
 
+    @Setter
     @Column
     private String subject;
 
+    @Setter
     @Column(nullable = false, columnDefinition = "TEXT")
     private String body;
 
