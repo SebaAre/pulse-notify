@@ -1,5 +1,6 @@
 package com.pulsenotify.template.controller;
 
+import com.pulsenotify.template.dto.TemplateRenderRequest;
 import com.pulsenotify.template.dto.TemplateRequest;
 import com.pulsenotify.template.dto.TemplateResponse;
 import com.pulsenotify.template.service.TemplateService;
@@ -44,4 +45,11 @@ public class TemplateController {
         templateService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{id}/render")
+    public ResponseEntity<String> render(@PathVariable UUID id, @Valid @RequestBody TemplateRenderRequest request) {     
+        String renderedContent = templateService.render(id, request.variables());
+        return ResponseEntity.ok(renderedContent);
+    }
+
 }
