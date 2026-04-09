@@ -13,7 +13,7 @@
 
   <artifactId>template-service</artifactId>
   <name>PulseNotify :: Template Service</name>
-  <description>Notification template CRUD, versioning, and Thymeleaf rendering</description>
+  <description>Notification template CRUD, versioning, and Freemarker rendering</description>
 
   <dependencies>
     <dependency>
@@ -34,7 +34,7 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-thymeleaf</artifactId>
+      <artifactId>spring-boot-starter-freemarker</artifactId>
     </dependency>
     <dependency>
       <groupId>io.micrometer</groupId>

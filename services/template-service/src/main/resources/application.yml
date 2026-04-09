@@ -13,8 +13,10 @@ spring:
       ddl-auto: validate
   flyway:
     enabled: true
-  thymeleaf:
-    cache: false  # Set to true in production
+  freemarker:
+    template-loader-path: classpath:/templates/
+    suffix: .ftl                                                                                       
+    cache: false
 
 management:
   endpoints:
