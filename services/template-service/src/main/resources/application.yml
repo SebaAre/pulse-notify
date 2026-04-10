@@ -13,10 +13,6 @@ spring:
       ddl-auto: validate
   flyway:
     enabled: true
-  freemarker:
-    template-loader-path: classpath:/templates/
-    suffix: .ftl                                                                                       
-    cache: false
 
 management:
   endpoints:
