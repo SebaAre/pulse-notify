@@ -3,13 +3,13 @@ package com.pulsenotify.notification.service;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.pulsenotify.events.NotificationRequestedEvent;
 import com.pulsenotify.notification.dto.NotificationRequest;
 import com.pulsenotify.notification.dto.NotificationResponse;
+import com.pulsenotify.notification.event.NotificationEventPublisher;
 import com.pulsenotify.notification.exception.NotificationNotFoundException;
 import com.pulsenotify.notification.model.Notification;
 import com.pulsenotify.notification.model.NotificationStatus;
@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class NotificationService {
     
     private final NotificationRepository notificationRepository;
-    private final KafkaTemplate<String, NotificationRequestedEvent> kafkaTemplate;
+    private final NotificationEventPublisher eventPublisher;
     
     @Transactional
     public NotificationResponse sendNotification(NotificationRequest request) {
@@ -46,7 +46,7 @@ public class NotificationService {
             .timestamp(savedNotification.getCreatedAt())
             .build();
 
-        kafkaTemplate.send("notification.requested", savedNotification.getId().toString(), event);
+        eventPublisher.publishNotificationRequestedEvent(event);
 
         return toResponse(savedNotification);
 

@@ -3,7 +3,6 @@ package com.pulsenotify.notification.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,12 +16,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.kafka.core.KafkaTemplate;
 
 import com.pulsenotify.events.NotificationChannel;
 import com.pulsenotify.events.NotificationRequestedEvent;
 import com.pulsenotify.notification.dto.NotificationRequest;
 import com.pulsenotify.notification.dto.NotificationResponse;
+import com.pulsenotify.notification.event.NotificationEventPublisher;
 import com.pulsenotify.notification.exception.NotificationNotFoundException;
 import com.pulsenotify.notification.model.Notification;
 import com.pulsenotify.notification.model.NotificationStatus;
@@ -35,7 +34,7 @@ public class NotificationServiceTest {
     private NotificationRepository notificationRepository;
 
     @Mock
-    private KafkaTemplate<String, NotificationRequestedEvent> kafkaTemplate;
+    private NotificationEventPublisher notificationEventPublisher;
 
     @InjectMocks
     private NotificationService notificationService;
@@ -70,8 +69,7 @@ public class NotificationServiceTest {
         // ASSERT
         assertThat(response.id()).isEqualTo(generatedId);
         assertThat(response.status()).isEqualTo(NotificationStatus.PENDING);
-        verify(kafkaTemplate).send(eq("notification.requested"), eq(generatedId.toString()), any(NotificationRequestedEvent.class));
-
+        verify(notificationEventPublisher).publishNotificationRequestedEvent(any(NotificationRequestedEvent.class));
     }
 
     @Test
