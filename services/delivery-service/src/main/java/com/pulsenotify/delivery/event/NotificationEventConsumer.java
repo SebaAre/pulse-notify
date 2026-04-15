@@ -3,6 +3,7 @@ package com.pulsenotify.delivery.event;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import com.pulsenotify.delivery.service.DeliveryService;
 import com.pulsenotify.events.NotificationRequestedEvent;
 
 import lombok.RequiredArgsConstructor;
