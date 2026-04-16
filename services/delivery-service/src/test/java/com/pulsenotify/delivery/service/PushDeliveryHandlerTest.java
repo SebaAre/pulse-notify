@@ -13,52 +13,55 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.pulsenotify.delivery.exception.DeliveryException;
 import com.pulsenotify.events.NotificationChannel;
 import com.pulsenotify.events.NotificationRequestedEvent;
 
-import software.amazon.awssdk.services.sns.model.PublishRequest;
-import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 
 @ExtendWith(MockitoExtension.class)
-public class SmsDeliveryHandlerTest {
+public class PushDeliveryHandlerTest {
     
     @Mock
-    private SnsClient snsClient;
+    private SqsClient sqsClient;
 
     @InjectMocks
-    private SmsDeliveryHandler smsDeliveryHandler;
+    private PushDeliveryHandler pushDeliveryHandler;
 
     @Test
-    void supports_returnTrue_forSmsChannel() {
-        assertThat(smsDeliveryHandler.supports(NotificationChannel.SMS)).isTrue();
+    void supports_returnTrue_forPushChannel() {
+        assertThat(pushDeliveryHandler.supports(NotificationChannel.PUSH)).isTrue();
     }
 
     @Test
-    void supports_returnFalse_forNonSmsChannel() {
-        assertThat(smsDeliveryHandler.supports(NotificationChannel.EMAIL)).isFalse();
+    void supports_returnFalse_forNonPushChannel() {
+        assertThat(pushDeliveryHandler.supports(NotificationChannel.EMAIL)).isFalse();
     }
 
     @Test
-    void send_throwsDeliveryException_whenSnsClientFails() {
+    void send_throwsDeliveryException_whenSqsClientFails() {
         // ARRANGE
+        ReflectionTestUtils.setField(pushDeliveryHandler, "pushQueueUrl", "https://sqs.test/queue");
+
         NotificationRequestedEvent event = NotificationRequestedEvent.builder()
             .notificationId(UUID.randomUUID())
             .recipient("user@example.com")
-            .channel(NotificationChannel.SMS)
+            .channel(NotificationChannel.PUSH)
             .subject("Test subject")
             .messageBody("Hello!")
             .timestamp(Instant.now())
             .build();
 
-        when(snsClient.publish(any(PublishRequest.class)))    
-        .thenThrow(new RuntimeException("SNS error"));
+        when(sqsClient.sendMessage(any(SendMessageRequest.class)))    
+        .thenThrow(new RuntimeException("SQS error"));
 
         // ACT & ASSERT
-        assertThatThrownBy(() -> smsDeliveryHandler.send(event))
+        assertThatThrownBy(() -> pushDeliveryHandler.send(event))
           .isInstanceOf(DeliveryException.class)
-          .hasMessageContaining("Failed to send SMS");
+          .hasMessageContaining("Failed to send push notification");
 
     }
 

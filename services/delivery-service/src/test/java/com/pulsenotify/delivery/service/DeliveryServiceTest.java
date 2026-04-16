@@ -59,6 +59,7 @@ public class DeliveryServiceTest {
         //ASSERT
         verify(deliveryEventPublisher).publishAttempted(any(DeliveryAttemptedEvent.class));
         verify(deliveryEventPublisher).publishCompleted(any(DeliveryCompletedEvent.class));
+        verify(deliveryEventPublisher, never()).publishFailed(any());
 
     }
 
@@ -84,7 +85,7 @@ public class DeliveryServiceTest {
         //ASSERT
         verify(deliveryEventPublisher).publishAttempted(any(DeliveryAttemptedEvent.class));
         verify(deliveryEventPublisher).publishFailed(any());
-        verify(deliveryEventPublisher,never()).publishCompleted(any());
+        verify(deliveryEventPublisher, never()).publishCompleted(any());
     }
 
     @Test
@@ -107,7 +108,7 @@ public class DeliveryServiceTest {
         //ASSERT
         verify(deliveryEventPublisher).publishAttempted(any(DeliveryAttemptedEvent.class));
         verify(deliveryEventPublisher).publishFailed(any());
-        verify(deliveryEventPublisher,never()).publishCompleted(any());
+        verify(deliveryEventPublisher, never()).publishCompleted(any());
     }
 
 }

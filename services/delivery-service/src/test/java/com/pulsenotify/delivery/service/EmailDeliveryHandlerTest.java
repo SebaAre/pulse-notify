@@ -19,6 +19,7 @@ import com.pulsenotify.delivery.exception.DeliveryException;
 import com.pulsenotify.events.NotificationChannel;
 import com.pulsenotify.events.NotificationRequestedEvent;
 
+import software.amazon.awssdk.services.ses.model.SendEmailRequest;
 import software.amazon.awssdk.services.ses.SesClient;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,7 +44,7 @@ public class EmailDeliveryHandlerTest {
     @Test
     void send_throwsDeliveryException_whenSesClientFails() {
         // ARRANGE
-        ReflectionTestUtils.setField(emailDeliveryHandler,"fromAddress", "noreply@pulsenotify.io");
+        ReflectionTestUtils.setField(emailDeliveryHandler, "fromAddress", "noreply@pulsenotify.io");
 
         NotificationRequestedEvent event = NotificationRequestedEvent.builder()
             .notificationId(UUID.randomUUID())
@@ -54,7 +55,7 @@ public class EmailDeliveryHandlerTest {
             .timestamp(Instant.now())
             .build();
 
-        when(sesClient.sendEmail(any(software.amazon.awssdk.services.ses.model.SendEmailRequest.class)))    
+        when(sesClient.sendEmail(any(SendEmailRequest.class)))    
         .thenThrow(new RuntimeException("SES error"));
 
         // ACT & ASSERT
