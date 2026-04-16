@@ -20,7 +20,6 @@ import com.pulsenotify.delivery.event.DeliveryEventPublisher;
 import com.pulsenotify.delivery.exception.DeliveryException;
 import com.pulsenotify.events.DeliveryAttemptedEvent;
 import com.pulsenotify.events.DeliveryCompletedEvent;
-import com.pulsenotify.events.DeliveryFailedEvent;
 import com.pulsenotify.events.NotificationChannel;
 import com.pulsenotify.events.NotificationRequestedEvent;
 
