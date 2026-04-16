@@ -13,7 +13,9 @@ import com.pulsenotify.events.DeliveryFailedEvent;
 import com.pulsenotify.events.NotificationRequestedEvent;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DeliveryService {
@@ -22,14 +24,14 @@ public class DeliveryService {
 
     private final List<DeliveryHandler> handlers;
 
-    public void processDelivery(NotificationRequestedEvent event) {
+    public void processDelivery(NotificationRequestedEvent event, int attemptNumber) {
 
         deliveryEventPublisher.publishAttempted(
             DeliveryAttemptedEvent.builder()
                 .notificationId(event.getNotificationId())
                 .channel(event.getChannel())
                 .recipient(event.getRecipient())
-                .attemptNumber(1)
+                .attemptNumber(attemptNumber)
                 .timestamp(Instant.now())
                 .build()
         );
@@ -58,10 +60,12 @@ public class DeliveryService {
                     .recipient(event.getRecipient())
                     .errorCode("DELIVERY_ERROR")
                     .errorMessage(deliveryException.getMessage())
-                    .attemptNumber(1)
+                    .attemptNumber(attemptNumber)
                     .timestamp(Instant.now())
                     .build()
             );
+             log.warn("Delivery failed permanently for notificationId={}, channel={}, attempt={}. Message sent to DLQ for manual review.",
+                event.getNotificationId(), event.getChannel(), attemptNumber);
         }
     }
 }

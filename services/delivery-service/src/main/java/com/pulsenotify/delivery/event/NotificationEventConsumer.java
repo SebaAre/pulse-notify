@@ -16,7 +16,7 @@ public class NotificationEventConsumer {
 
     @KafkaListener(topics = "notification.requested", groupId = "delivery-service")
     public void handleNotificationRequested(NotificationRequestedEvent event) {
-        deliveryService.processDelivery(event);
+        deliveryService.processDelivery(event, 1);
     }
 
 }

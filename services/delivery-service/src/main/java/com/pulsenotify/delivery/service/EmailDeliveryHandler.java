@@ -1,6 +1,8 @@
 package com.pulsenotify.delivery.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import com.pulsenotify.delivery.exception.DeliveryException;
@@ -29,6 +31,11 @@ public class EmailDeliveryHandler implements DeliveryHandler {
         return NotificationChannel.EMAIL == channel;
     }
 
+    @Retryable(
+        retryFor = DeliveryException.class,
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 1000, multiplier = 2)
+    )
     @Override
     public void send(NotificationRequestedEvent event) {
         try {
