@@ -3,6 +3,6 @@
 
 CREATE SCHEMA IF NOT EXISTS notification;
 CREATE SCHEMA IF NOT EXISTS template;
-CREATE SCHEMA IF NOT EXISTS "user";
+CREATE SCHEMA IF NOT EXISTS user_svc;
 
 -- Flyway migrations for each service will handle table creation.
