@@ -36,6 +36,7 @@ public class UserAccount {
     @Column(unique = true)
     private String phone;
 
+    @Column
     private String pushToken;
 
     @Column(nullable = false)
