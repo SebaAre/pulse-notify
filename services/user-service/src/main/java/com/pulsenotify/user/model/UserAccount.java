@@ -42,9 +42,8 @@ public class UserAccount {
     @Column(nullable = false)
     private String displayName;
 
-    @Builder.Default
     @Column(nullable = false)
-    private String timezone = "UTC";
+    private String timezone;
 
     @Builder.Default
     @Column(nullable = false)

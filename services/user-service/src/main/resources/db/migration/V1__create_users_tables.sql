@@ -4,9 +4,9 @@ CREATE TABLE IF NOT EXISTS user_svc.users (
     id UUID PRIMARY KEY,
     email VARCHAR(254) NOT NULL UNIQUE,
     phone VARCHAR(30) UNIQUE,
-    push_token VARCHAR(255),
-    display_name VARCHAR(255) NOT NULL,
-    timezone VARCHAR(50) NOT NULL DEFAULT 'UTC',
+    push_token VARCHAR(254),
+    display_name VARCHAR(254) NOT NULL,
+    timezone VARCHAR(50) NOT NULL,
     active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL,
     updated_at TIMESTAMPTZ NOT NULL
