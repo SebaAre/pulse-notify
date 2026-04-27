@@ -1,5 +1,6 @@
 package com.pulsenotify.audit.service;
 
+import com.pulsenotify.audit.dto.AuditEventResponse;
 import com.pulsenotify.audit.model.AuditEvent;
 import com.pulsenotify.events.DeliveryAttemptedEvent;
 import com.pulsenotify.events.DeliveryCompletedEvent;
@@ -63,4 +64,19 @@ public final class AuditEventMapper {
                 .errorMessage(event.getErrorMessage())
                 .build();
     }
+
+    public static AuditEventResponse toResponse(AuditEvent event) {
+        return new AuditEventResponse(
+                event.getNotificationId(),
+                event.getTimestamp(),
+                event.getEventType(),
+                event.getChannel(),
+                event.getRecipient(),
+                event.getAttemptNumber(),
+                event.getErrorCode(),
+                event.getErrorMessage(),
+                event.getProviderMessageId()
+        );
+    }
+
 }
