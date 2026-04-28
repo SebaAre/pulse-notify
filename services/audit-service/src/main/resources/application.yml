@@ -19,6 +19,7 @@ aws:
   dynamodb:
     table-name: ${DYNAMODB_TABLE:pulse-audit-events}
     endpoint-override: ${AWS_ENDPOINT_OVERRIDE:http://localhost:8000}
+    auto-create-table: ${DYNAMODB_AUTO_CREATE_TABLE:true}
 
 management:
   endpoints:
