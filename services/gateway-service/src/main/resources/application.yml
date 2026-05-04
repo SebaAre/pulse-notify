@@ -6,7 +6,6 @@ spring:
     name: gateway-service
   cloud:
     gateway:
-      routes: []  # Routes configured in GatewayConfig.java
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
   security:
@@ -14,6 +13,20 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${JWT_ISSUER_URI:http://localhost:8090/auth/realms/pulsenotify}
+
+pulsenotify:
+  gateway:
+    cors:
+      allowed-origins:
+        - http://localhost:5173
+        - http://localhost:3000
+    rate-limit:
+      requests-per-minute: 120
+    downstream:
+      notification: ${NOTIFICATION_SERVICE_URL:http://localhost:8081}
+      template:     ${TEMPLATE_SERVICE_URL:http://localhost:8083}
+      user:         ${USER_SERVICE_URL:http://localhost:8084}
+      audit:        ${AUDIT_SERVICE_URL:http://localhost:8085}
 
 management:
   endpoints:
@@ -28,4 +41,4 @@ management:
 logging:
   level:
     com.pulsenotify: INFO
-    org.springframework.cloud.gateway: DEBUG
+    org.springframework.cloud.gateway: INFO
