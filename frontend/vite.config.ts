@@ -1,10 +1,13 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(), 
+    tailwindcss()
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -13,7 +16,6 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // Proxy API calls to the gateway service during local dev
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
