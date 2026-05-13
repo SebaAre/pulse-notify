@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: gateway-service
+  profiles:
+    default: dev
   data:
     redis:
       host: ${REDIS_HOST:localhost}
@@ -18,11 +20,6 @@ spring:
             redis-rate-limiter.burstCapacity: 20
             redis-rate-limiter.requestedTokens: 1
             key-resolver: "#{@ipKeyResolver}"
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8090/auth/realms/pulsenotify}
 
 pulsenotify:
   gateway:
@@ -50,3 +47,14 @@ logging:
   level:
     com.pulsenotify: INFO
     org.springframework.cloud.gateway: INFO
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8090/auth/realms/pulsenotify}
