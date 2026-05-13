@@ -16,15 +16,19 @@ public class RouteConfig {
         return builder.routes()
                 .route("notification-service", r -> r
                         .path("/api/notifications/**")
+                        .filters(f -> f.rewritePath("/api/notifications/?(?<segment>.*)", "/api/v1/notifications/$\\{segment}"))
                         .uri(ds.notification()))
                 .route("template-service", r -> r
                         .path("/api/templates/**")
+                        .filters(f -> f.rewritePath("/api/templates/?(?<segment>.*)", "/api/v1/templates/$\\{segment}"))
                         .uri(ds.template()))
                 .route("user-service", r -> r
-                        .path("/api/users/**", "/api/preferences/**")
+                        .path("/api/users/**")
+                        .filters(f -> f.rewritePath("/api/users/?(?<segment>.*)", "/api/v1/users/$\\{segment}"))
                         .uri(ds.user()))
                 .route("audit-service", r -> r
                         .path("/api/audit/**")
+                        .filters(f -> f.rewritePath("/api/audit/?(?<segment>.*)", "/api/v1/audit-events/$\\{segment}"))
                         .uri(ds.audit()))
                 .build();
     }
