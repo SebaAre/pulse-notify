@@ -1,22 +1,18 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { BrowserRouter } from 'react-router-dom'
-
-const queryClient = new QueryClient()
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { AppShell } from '@/components/layout/AppShell'
+import { DashboardPage } from '@/pages/DashboardPage'
+import { NotificationsPage } from '@/pages/NotificationsPage'
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-          <div className="rounded-lg border bg-card p-8 shadow-sm">
-            <h1 className="text-3xl font-bold text-primary">PulseNotify</h1>
-            <p className="text-muted-foreground mt-2">
-              Hello world!
-            </p>
-          </div>
-        </div>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <BrowserRouter>
+      <Routes>
+        <Route element={<AppShell />}>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   )
 }
 
