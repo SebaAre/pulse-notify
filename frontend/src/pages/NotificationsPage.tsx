@@ -1,7 +1,8 @@
 import { FormEvent, useState } from 'react'
 import { format } from 'date-fns'
-import { Search } from 'lucide-react'
+import { Plus, Search } from 'lucide-react'
 import { useNotifications } from '@/hooks/useNotifications'
+import { NotificationForm } from '@/components/notifications/NotificationForm'
 import type { NotificationChannel, NotificationStatus } from '@/types/notification'
 import { cn } from '@/lib/utils'
 
@@ -20,6 +21,7 @@ const statusStyles: Record<NotificationStatus, string> = {
 export function NotificationsPage() {
   const [input, setInput] = useState('')
   const [recipient, setRecipient] = useState('')
+  const [showForm, setShowForm] = useState(false)
 
   const { data, isLoading, isError, error } = useNotifications(recipient)
 
@@ -30,12 +32,30 @@ export function NotificationsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold">Notifications</h2>
-        <p className="text-sm text-muted-foreground">
-          Search notifications by recipient email or phone.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-semibold">Notifications</h2>
+          <p className="text-sm text-muted-foreground">
+            Search notifications by recipient email or phone.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowForm((s) => !s)}
+          className="h-9 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 inline-flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          New
+        </button>
       </div>
+
+      {showForm && (
+        <NotificationForm
+          defaultRecipient={recipient}
+          onSuccess={() => setShowForm(false)}
+          onCancel={() => setShowForm(false)}
+        />
+      )}
 
       <form onSubmit={handleSubmit} className="flex gap-2 max-w-md">
         <div className="relative flex-1">
