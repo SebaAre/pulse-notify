@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pulsenotify.events.NotificationChannel;
 import com.pulsenotify.notification.dto.NotificationRequest;
 import com.pulsenotify.notification.dto.NotificationResponse;
+import com.pulsenotify.notification.dto.NotificationStatsResponse;
 import com.pulsenotify.notification.exception.NotificationNotFoundException;
 import com.pulsenotify.notification.model.NotificationStatus;
 import com.pulsenotify.notification.service.NotificationService;
@@ -143,5 +145,34 @@ class NotificationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].recipient").value(recipient));
+    }
+
+    @Test
+    void getStats_returns200WithBreakdowns() throws Exception {
+        NotificationStatsResponse response = new NotificationStatsResponse(
+                8L,
+                Map.of(
+                        NotificationStatus.PENDING, 5L,
+                        NotificationStatus.SENT, 3L,
+                        NotificationStatus.FAILED, 0L
+                ),
+                Map.of(
+                        NotificationChannel.EMAIL, 7L,
+                        NotificationChannel.SMS, 1L,
+                        NotificationChannel.PUSH, 0L
+                )
+        );
+
+        when(notificationService.getStats()).thenReturn(response);
+
+        mockMvc.perform(get("/api/v1/notifications/stats"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(8))
+                .andExpect(jsonPath("$.byStatus.PENDING").value(5))
+                .andExpect(jsonPath("$.byStatus.SENT").value(3))
+                .andExpect(jsonPath("$.byStatus.FAILED").value(0))
+                .andExpect(jsonPath("$.byChannel.EMAIL").value(7))
+                .andExpect(jsonPath("$.byChannel.SMS").value(1))
+                .andExpect(jsonPath("$.byChannel.PUSH").value(0));
     }
 }
