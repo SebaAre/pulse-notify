@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.pulsenotify.notification.dto.NotificationRequest;
 import com.pulsenotify.notification.dto.NotificationResponse;
+import com.pulsenotify.notification.dto.NotificationStatsResponse;
 import com.pulsenotify.notification.service.NotificationService;
 
 import jakarta.validation.Valid;
@@ -33,6 +34,11 @@ public class NotificationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @GetMapping("/stats")
+    public ResponseEntity<NotificationStatsResponse> getStats() {
+        return ResponseEntity.ok(notificationService.getStats());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<NotificationResponse> getNotificationById(@PathVariable UUID id){
         NotificationResponse response = notificationService.getNotificationById(id);
@@ -45,5 +51,5 @@ public class NotificationController {
         return ResponseEntity.ok(response);
     }
 
-    
+
 }
