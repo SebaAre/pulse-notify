@@ -3,6 +3,7 @@ package com.pulsenotify.notification.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,11 +22,14 @@ import com.pulsenotify.events.NotificationChannel;
 import com.pulsenotify.events.NotificationRequestedEvent;
 import com.pulsenotify.notification.dto.NotificationRequest;
 import com.pulsenotify.notification.dto.NotificationResponse;
+import com.pulsenotify.notification.dto.NotificationStatsResponse;
 import com.pulsenotify.notification.event.NotificationEventPublisher;
 import com.pulsenotify.notification.exception.NotificationNotFoundException;
 import com.pulsenotify.notification.model.Notification;
 import com.pulsenotify.notification.model.NotificationStatus;
+import com.pulsenotify.notification.repository.ChannelCount;
 import com.pulsenotify.notification.repository.NotificationRepository;
+import com.pulsenotify.notification.repository.StatusCount;
 
 @ExtendWith(MockitoExtension.class)
 public class NotificationServiceTest {
@@ -141,6 +145,45 @@ public class NotificationServiceTest {
         // ASSERT
         assertThat(responses).hasSize(2);
         assertThat(responses).allMatch(r -> r.recipient().equals(recipient));
+    }
+
+    @Test
+    void getStats_returnsTotalAndBreakdownsWithZeroDefaults() {
+        // ARRANGE
+        StatusCount pending = mock(StatusCount.class);
+        when(pending.getStatus()).thenReturn(NotificationStatus.PENDING);
+        when(pending.getCount()).thenReturn(5L);
+
+        StatusCount sent = mock(StatusCount.class);
+        when(sent.getStatus()).thenReturn(NotificationStatus.SENT);
+        when(sent.getCount()).thenReturn(3L);
+
+        ChannelCount email = mock(ChannelCount.class);
+        when(email.getChannel()).thenReturn(NotificationChannel.EMAIL);
+        when(email.getCount()).thenReturn(7L);
+
+        ChannelCount sms = mock(ChannelCount.class);
+        when(sms.getChannel()).thenReturn(NotificationChannel.SMS);
+        when(sms.getCount()).thenReturn(1L);
+
+        when(notificationRepository.countGroupedByStatus()).thenReturn(List.of(pending, sent));
+        when(notificationRepository.countGroupedByChannel()).thenReturn(List.of(email, sms));
+
+        // ACT
+        NotificationStatsResponse response = notificationService.getStats();
+
+        // ASSERT
+        assertThat(response.total()).isEqualTo(8L);
+
+        assertThat(response.byStatus())
+            .containsEntry(NotificationStatus.PENDING, 5L)
+            .containsEntry(NotificationStatus.SENT, 3L)
+            .containsEntry(NotificationStatus.FAILED, 0L);
+
+        assertThat(response.byChannel())
+            .containsEntry(NotificationChannel.EMAIL, 7L)
+            .containsEntry(NotificationChannel.SMS, 1L)
+            .containsEntry(NotificationChannel.PUSH, 0L);
     }
 
 
