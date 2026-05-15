@@ -1,14 +1,18 @@
 package com.pulsenotify.notification.service;
 
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.pulsenotify.events.NotificationChannel;
 import com.pulsenotify.events.NotificationRequestedEvent;
 import com.pulsenotify.notification.dto.NotificationRequest;
 import com.pulsenotify.notification.dto.NotificationResponse;
+import com.pulsenotify.notification.dto.NotificationStatsResponse;
 import com.pulsenotify.notification.event.NotificationEventPublisher;
 import com.pulsenotify.notification.exception.NotificationNotFoundException;
 import com.pulsenotify.notification.model.Notification;
@@ -20,10 +24,10 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
-    
+
     private final NotificationRepository notificationRepository;
     private final NotificationEventPublisher eventPublisher;
-    
+
     @Transactional
     public NotificationResponse sendNotification(NotificationRequest request) {
 
@@ -34,9 +38,9 @@ public class NotificationService {
             .messageBody(request.messageBody())
             .status(NotificationStatus.PENDING)
             .build();
-        
+
         Notification savedNotification = notificationRepository.save(notification);
-        
+
         NotificationRequestedEvent event = NotificationRequestedEvent.builder()
             .notificationId(savedNotification.getId())
             .recipient(savedNotification.getRecipient())
@@ -55,7 +59,7 @@ public class NotificationService {
     @Transactional(readOnly = true)
     public NotificationResponse getNotificationById(UUID id) {
         Notification notification = notificationRepository.findById(id).orElseThrow(() -> new NotificationNotFoundException(id));
-    
+
         return toResponse(notification);
     }
 
@@ -66,6 +70,28 @@ public class NotificationService {
             .stream()
             .map(this::toResponse)
             .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public NotificationStatsResponse getStats() {
+
+        Map<NotificationStatus, Long> byStatus = new EnumMap<>(NotificationStatus.class);
+        for (NotificationStatus s : NotificationStatus.values()) {
+            byStatus.put(s, 0L);
+        }
+        notificationRepository.countGroupedByStatus()
+            .forEach(row -> byStatus.put(row.getStatus(), row.getCount()));
+
+        Map<NotificationChannel, Long> byChannel = new EnumMap<>(NotificationChannel.class);
+        for (NotificationChannel c : NotificationChannel.values()) {
+            byChannel.put(c, 0L);
+        }
+        notificationRepository.countGroupedByChannel()
+            .forEach(row -> byChannel.put(row.getChannel(), row.getCount()));
+
+        long total = byStatus.values().stream().mapToLong(Long::longValue).sum();
+
+        return new NotificationStatsResponse(total, byStatus, byChannel);
     }
 
     private NotificationResponse toResponse(Notification notification) {
