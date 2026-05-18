@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -184,6 +185,43 @@ public class NotificationServiceTest {
             .containsEntry(NotificationChannel.EMAIL, 7L)
             .containsEntry(NotificationChannel.SMS, 1L)
             .containsEntry(NotificationChannel.PUSH, 0L);
+    }
+
+    @Test
+    void markStatus_whenNotificationFound_updatesStatusAndSaves() {
+        // ARRANGE
+        UUID id = UUID.randomUUID();
+        Notification notification = Notification.builder()
+            .id(id)
+            .recipient("user@example.com")
+            .channel(NotificationChannel.EMAIL)
+            .messageBody("Hello!")
+            .status(NotificationStatus.PENDING)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
+
+        when(notificationRepository.findById(id)).thenReturn(Optional.of(notification));
+
+        // ACT
+        notificationService.markStatus(id, NotificationStatus.SENT);
+
+        // ASSERT
+        assertThat(notification.getStatus()).isEqualTo(NotificationStatus.SENT);
+        verify(notificationRepository).save(notification);
+    }
+
+    @Test
+    void markStatus_whenNotificationNotFound_doesNotSaveOrThrow() {
+        // ARRANGE
+        UUID id = UUID.randomUUID();
+        when(notificationRepository.findById(id)).thenReturn(Optional.empty());
+
+        // ACT
+        notificationService.markStatus(id, NotificationStatus.FAILED);
+
+        // ASSERT
+        verify(notificationRepository, never()).save(any());
     }
 
 
