@@ -5,6 +5,7 @@ export const notificationKeys = {
   all: ['notifications'] as const,
   list: (recipient: string) => [...notificationKeys.all, 'list', recipient] as const,
   detail: (id: string) => [...notificationKeys.all, 'detail', id] as const,
+  stats: () => [...notificationKeys.all, 'stats'] as const,
 }
 
 export function useNotifications(recipient: string) {
