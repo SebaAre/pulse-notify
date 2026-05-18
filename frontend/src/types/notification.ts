@@ -18,3 +18,9 @@ export interface CreateNotificationRequest {
   channel: NotificationChannel
   messageBody: string
 }
+
+export interface NotificationStats {
+  total: number
+  byStatus: Record<NotificationStatus, number>
+  byChannel: Record<NotificationChannel, number>
+}
