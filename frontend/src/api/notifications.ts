@@ -2,6 +2,7 @@ import { apiClient } from './client'
 import type {
   CreateNotificationRequest,
   Notification,
+  NotificationStats,
 } from '@/types/notification'
 
 export const notificationsApi = {
@@ -23,6 +24,13 @@ export const notificationsApi = {
     const { data } = await apiClient.post<Notification>(
       '/notifications',
       request,
+    )
+    return data
+  },
+
+  stats: async (): Promise<NotificationStats> => {
+    const { data } = await apiClient.get<NotificationStats>(
+      '/notifications/stats',
     )
     return data
   },
