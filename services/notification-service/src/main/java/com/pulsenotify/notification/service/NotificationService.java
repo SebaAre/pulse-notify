@@ -20,8 +20,10 @@ import com.pulsenotify.notification.model.NotificationStatus;
 import com.pulsenotify.notification.repository.NotificationRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class NotificationService {
 
@@ -92,6 +94,18 @@ public class NotificationService {
         long total = byStatus.values().stream().mapToLong(Long::longValue).sum();
 
         return new NotificationStatsResponse(total, byStatus, byChannel);
+    }
+
+    @Transactional
+    public void markStatus(UUID notificationId, NotificationStatus status) {
+        notificationRepository.findById(notificationId).ifPresentOrElse(
+            notification -> {
+                notification.setStatus(status);
+                notificationRepository.save(notification);
+                log.info("Notification {} transitioned to {}", notificationId, status);
+            },
+            () -> log.warn("Notification {} not found; ignoring {} event", notificationId, status)
+        );
     }
 
     private NotificationResponse toResponse(Notification notification) {
