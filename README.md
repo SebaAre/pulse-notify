@@ -2,6 +2,10 @@
 
 An event-driven, multi-channel notification platform built on a cloud-native microservices architecture.
 
+**Status:** runs end-to-end locally via Docker Compose. AWS infrastructure (Terraform + Kubernetes manifests) is production-grade and included as a reference deployment target — not currently provisioned.
+
+**Stack at a glance:** Java 21 · Spring Boot 3.2 · Apache Kafka · PostgreSQL · DynamoDB · AWS SDK v2 (SES/SNS/SQS) · React 18 + TypeScript · Prometheus/Loki/Grafana · Terraform · Kubernetes.
+
 ## Architecture Overview
 
 ```
@@ -132,6 +136,18 @@ npm install
 npm run dev          # Dev server on http://localhost:5173 (proxies /api → :8080)
 ```
 
+The web app (React 18 + Vite + TanStack Query) ships five pages, one per backend domain:
+
+| Route            | Page              | Hits service(s)                 |
+|------------------|-------------------|---------------------------------|
+| `/`              | Dashboard         | notification-service `/stats`   |
+| `/notifications` | Notifications     | notification-service            |
+| `/templates`     | Templates         | template-service                |
+| `/users`         | Users             | user-service                    |
+| `/audit`         | Audit log         | audit-service                   |
+
+All calls go through `/api/*`, proxied to the gateway in dev and routed by Spring Cloud Gateway to the right downstream service.
+
 ### Observability
 
 | Tool       | URL                   | Credentials |
@@ -139,6 +155,17 @@ npm run dev          # Dev server on http://localhost:5173 (proxies /api → :80
 | Grafana    | http://localhost:3000 | see `.env`  |
 | Prometheus | http://localhost:9090 | —           |
 | Loki       | http://localhost:3100 | —           |
+
+## Code Highlights
+
+A few things in the codebase that I think are worth a closer look:
+
+- **Strategy pattern in delivery-service** — `DeliveryService` accepts a `List<DeliveryHandler>` injected by Spring and picks the matching handler via `supports()`. Adding a new channel is a single new `@Component` with zero edits to existing code. See `services/delivery-service/src/main/java/com/pulsenotify/delivery/service/`.
+- **Closed feedback loop on Kafka** — `delivery-service` publishes `delivery.completed` / `delivery.failed`; `notification-service` consumes them and transitions the persisted notification row from `PENDING` → `SENT` / `FAILED`. See `notification-service/.../event/DeliveryEventConsumer.java` and `service/NotificationService#markStatus`.
+- **Multi-storage by intent** — PostgreSQL for transactional domains (notifications, templates, users) with Flyway migrations; DynamoDB for the append-only audit trail via the AWS SDK v2 Enhanced Client. Schemas are isolated per service even though they share a Postgres container locally.
+- **Shared event contracts** — Kafka message POJOs live in `shared/events` and are imported as a Maven dependency. There is one canonical class per event type; services never duplicate the shape.
+- **Reactive gateway, servlet downstreams** — `gateway-service` is WebFlux + Spring Cloud Gateway; downstream services are servlet-based Spring MVC. JWT validation and rate limiting are gateway-side; downstreams trust the routed traffic.
+- **Atomic commit history** — one modified file per commit, past-tense subjects. Browse `git log --oneline` to walk the build feature by feature.
 
 ## Project Layout
 
