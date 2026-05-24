@@ -4,6 +4,7 @@ import { DashboardPage } from '@/pages/DashboardPage'
 import { NotificationsPage } from '@/pages/NotificationsPage'
 import { TemplatesPage } from '@/pages/TemplatesPage'
 import { AuditPage } from '@/pages/AuditPage'
+import { UsersPage } from '@/pages/UsersPage'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/templates" element={<TemplatesPage />} />
           <Route path="/audit" element={<AuditPage />} />
+          <Route path="/users" element={<UsersPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
