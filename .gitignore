@@ -93,6 +93,8 @@ jacoco.xml
 # ── Kubernetes ────────────────────────────────────────────────────────────────
 kubeconfig
 *.kubeconfig
+infra/k8s/secrets.yaml
+!infra/k8s/secrets-example.yaml
 
 
 # ── Agents IA ────────────────────────────────────────────────────────────────
