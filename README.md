@@ -68,11 +68,10 @@ notification-service  ──► notification.requested  ──► delivery-servi
 | Topic                    | Producer             | Consumer(s)                          |
 |--------------------------|----------------------|--------------------------------------|
 | `notification.requested` | notification-service | delivery-service, audit-service      |
-| `notification.processed` | notification-service | audit-service                        |
 | `delivery.attempted`     | delivery-service     | audit-service                        |
 | `delivery.completed`     | delivery-service     | notification-service, audit-service  |
 | `delivery.failed`        | delivery-service     | notification-service, audit-service  |
-| `delivery.failed.dlq`    | delivery-service     | delivery-service (retry)             |
+| `delivery.failed.dlq`    | delivery-service     | delivery-service (retry, max 3)      |
 
 ## Tech Stack
 
@@ -162,6 +161,8 @@ A few things in the codebase that I think are worth a closer look:
 
 - **Strategy pattern in delivery-service** — `DeliveryService` accepts a `List<DeliveryHandler>` injected by Spring and picks the matching handler via `supports()`. Adding a new channel is a single new `@Component` with zero edits to existing code. See `services/delivery-service/src/main/java/com/pulsenotify/delivery/service/`.
 - **Closed feedback loop on Kafka** — `delivery-service` publishes `delivery.completed` / `delivery.failed`; `notification-service` consumes them and transitions the persisted notification row from `PENDING` → `SENT` / `FAILED`. See `notification-service/.../event/DeliveryEventConsumer.java` and `service/NotificationService#markStatus`.
+- **DLQ with bounded retry** — permanent failures in `delivery-service` are published to `delivery.failed.dlq` carrying the original `NotificationRequestedEvent` plus an `x-delivery-attempt` Kafka header. `DlqRetryConsumer` re-attempts up to 3 times and then drops, avoiding poison-message loops. See `services/delivery-service/.../event/DlqRetryConsumer.java`.
+- **End-to-end integration test with real infrastructure** — `NotificationFlowIntegrationTest` spins up Postgres and Kafka via Testcontainers, hits the controller over HTTP, publishes a delivery event on Kafka, and uses Awaitility to verify the row transitions to `SENT`. No mocks. Tagged `@Tag("integration")` and excluded from the default Surefire run; opt in with `make test-integration SVC=notification-service`.
 - **Multi-storage by intent** — PostgreSQL for transactional domains (notifications, templates, users) with Flyway migrations; DynamoDB for the append-only audit trail via the AWS SDK v2 Enhanced Client. Schemas are isolated per service even though they share a Postgres container locally.
 - **Shared event contracts** — Kafka message POJOs live in `shared/events` and are imported as a Maven dependency. There is one canonical class per event type; services never duplicate the shape.
 - **Reactive gateway, servlet downstreams** — `gateway-service` is WebFlux + Spring Cloud Gateway; downstream services are servlet-based Spring MVC. JWT validation and rate limiting are gateway-side; downstreams trust the routed traffic.
@@ -192,9 +193,11 @@ pulse-notify/
 └── .github/workflows/  # CI/CD pipelines
 ```
 
-## Deployment
+## Intended Cloud Deployment
 
-Infrastructure is managed with Terraform targeting AWS. Services run on EKS.
+> The project runs entirely on local Docker today. The Terraform and Kubernetes manifests below describe the **intended** AWS deployment topology and are included as architectural reference — they are not actively provisioned against an account.
+
+Infrastructure-as-code targets AWS: EKS for the services, RDS for PostgreSQL, MSK for Kafka, DynamoDB for the audit trail.
 
 ```bash
 cd infra/terraform
@@ -209,4 +212,4 @@ Rolling deploys via Kubernetes:
 scripts/deploy.sh <staging|prod> <image-tag>
 ```
 
-See `infra/terraform/README.md` for detailed AWS setup.
+See `infra/terraform/README.md` for the full AWS topology.
