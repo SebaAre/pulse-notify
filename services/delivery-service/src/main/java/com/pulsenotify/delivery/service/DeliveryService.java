@@ -64,7 +64,8 @@ public class DeliveryService {
                     .timestamp(Instant.now())
                     .build()
             );
-             log.warn("Delivery failed permanently for notificationId={}, channel={}, attempt={}. Message sent to DLQ for manual review.",
+            deliveryEventPublisher.publishToDlq(event, attemptNumber);
+            log.warn("Delivery failed for notificationId={}, channel={}, attempt={}. Routed to DLQ for retry.",
                 event.getNotificationId(), event.getChannel(), attemptNumber);
         }
     }
