@@ -37,6 +37,7 @@
     <mapstruct.version>1.5.5.Final</mapstruct.version>
     <lombok.version>1.18.30</lombok.version>
     <checkstyle.version>3.3.1</checkstyle.version>
+    <test.excluded-groups>integration</test.excluded-groups>
   </properties>
 
   <dependencyManagement>
@@ -156,7 +157,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <excludedGroups>integration</excludedGroups>
+          <excludedGroups>${test.excluded-groups}</excludedGroups>
         </configuration>
       </plugin>
     </plugins>
