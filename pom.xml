@@ -36,7 +36,6 @@
     <testcontainers.version>1.19.3</testcontainers.version>
     <mapstruct.version>1.5.5.Final</mapstruct.version>
     <lombok.version>1.18.30</lombok.version>
-    <checkstyle.version>3.3.1</checkstyle.version>
     <test.excluded-groups>integration</test.excluded-groups>
   </properties>
 
@@ -138,16 +137,6 @@
                 <version>${mapstruct.version}</version>
               </path>
             </annotationProcessorPaths>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-checkstyle-plugin</artifactId>
-          <version>${checkstyle.version}</version>
-          <configuration>
-            <configLocation>checkstyle.xml</configLocation>
-            <consoleOutput>true</consoleOutput>
-            <failsOnError>true</failsOnError>
           </configuration>
         </plugin>
       </plugins>

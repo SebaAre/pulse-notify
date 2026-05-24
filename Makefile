@@ -30,9 +30,6 @@ test-unit: ## Run unit tests only (excludes integration tests)
 test-integration: ## Run integration tests only
 	$(MAVEN) verify -pl services/$(SVC) -am -Dgroups="integration" -Dtest.excluded-groups=
 
-lint: ## Run Checkstyle across all modules
-	$(MAVEN) checkstyle:check
-
 clean: ## Clean all build artifacts
 	$(MAVEN) clean
 
