@@ -24,7 +24,6 @@ create_topic() {
 }
 
 create_topic "notification.requested"   12
-create_topic "notification.processed"   12
 create_topic "delivery.attempted"       12
 create_topic "delivery.completed"       12
 create_topic "delivery.failed"          12 2592000000   # 30 days
