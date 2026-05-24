@@ -17,14 +17,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Test a single service
 ./mvnw test -pl services/notification-service
 
-# Lint (Checkstyle)
-./mvnw checkstyle:check
+# Integration tests (Testcontainers — requires Docker running)
+make test-integration SVC=notification-service
 
 # Frontend
 cd frontend && npm install
 npm run dev          # dev server :5173, proxies /api → gateway :8080
 npm run build
-npm run test
 npm run lint
 
 # Local infrastructure (Kafka, Postgres, DynamoDB, observability)
@@ -50,13 +49,12 @@ pulse-notify/
 │   ├── gateway-service     :8080  Spring Cloud Gateway — reactive, JWT validation, rate limiting
 │   ├── notification-service :8081  Core orchestration, PostgreSQL, Kafka producer
 │   ├── delivery-service    :8082  Kafka consumer → SNS/SES/SQS, no database
-│   ├── template-service    :8083  Template CRUD + Thymeleaf rendering, PostgreSQL
+│   ├── template-service    :8083  Template CRUD + Freemarker rendering, PostgreSQL
 │   ├── user-service        :8084  User preferences & subscriptions, PostgreSQL
 │   └── audit-service       :8085  Kafka consumer → DynamoDB, append-only
 ├── frontend/               React 18 + Vite + TypeScript, path alias @/ = src/
 ├── infra/
-│   ├── terraform/          AWS infrastructure (EKS, RDS, MSK, DynamoDB, SQS/SNS, S3)
-│   ├── k8s/                Kubernetes manifests (namespace, ingress, per-service deployment/service/hpa)
+│   ├── k8s/                Kubernetes manifests (namespace, configmap, ingress, per-service deployment/service/hpa)
 │   ├── kafka/topics.yaml   Canonical topic definitions
 │   └── docker/postgres/    init.sql creates schemas for local dev
 ├── observability/          Prometheus scrape config, Loki, Grafana provisioning
@@ -123,7 +121,7 @@ Uses Spring Cloud Gateway (reactive / WebFlux — **not** servlet-based). JWT va
 - Path alias `@/` maps to `src/` (configured in both `vite.config.ts` and `tsconfig.json`).
 - API calls go through `/api` prefix, which Vite proxies to `http://localhost:8080` in dev.
 - State management: Zustand for global state, TanStack Query for server state.
-- Tests use Vitest + Testing Library. Test setup file: `src/test/setup.ts`.
+- Vitest + Testing Library are wired in `vite.config.ts` (jsdom env). Per-test files go under `src/**/*.test.tsx`.
 
 ### Observability
 
@@ -139,7 +137,7 @@ Dead-letter topic: `delivery.failed.dlq` — consumed by `delivery-service` for 
 
 - Unit tests: `@ExtendWith(MockitoExtension.class)`, no Spring context.
 - Controller tests: `@WebMvcTest` + MockMvc (servlet services) or `@WebFluxTest` + WebTestClient (gateway-service).
-- Integration tests: `@SpringBootTest` + Testcontainers. Tag them with `@Tag("integration")` to run separately via `mvn test -Dgroups=integration`.
+- Integration tests: `@SpringBootTest` + Testcontainers. Tag them with `@Tag("integration")` — excluded from default `mvn test`. Run via `make test-integration SVC=<service>` or `./mvnw verify -pl services/<svc> -am -Dgroups=integration -Dtest.excluded-groups=`.
 - Kafka integration tests use embedded Kafka via `spring-kafka-test` (`@EmbeddedKafka`).
 
 ## Docker Images
@@ -156,6 +154,6 @@ docker build -t pulsenotify/notification-service:latest \
 
 ## Deployment
 
-EKS manifests are in `infra/k8s/<service-name>/`. Each service has `deployment.yaml`, `service.yaml`, and `hpa.yaml`. The `infra/k8s/ingress.yaml` routes `api.pulsenotify.io` → gateway-service and `app.pulsenotify.io` → frontend via AWS ALB Ingress Controller.
+Kubernetes manifests live in `infra/k8s/<service-name>/`. Each service has `deployment.yaml`, `service.yaml`, and `hpa.yaml`. Shared config in `infra/k8s/configmap.yaml`; secret placeholders in `infra/k8s/secrets-example.yaml` (never commit real secrets). The `infra/k8s/ingress.yaml` routes `api.pulsenotify.io` → gateway-service and `app.pulsenotify.io` → frontend via AWS ALB Ingress Controller.
 
 `scripts/deploy.sh <staging|prod> <image-tag>` performs a `kubectl set image` rolling update for all services.
