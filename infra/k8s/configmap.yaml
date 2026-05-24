@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pulse-notify-config
+  namespace: pulse-notify
+  labels:
+    app.kubernetes.io/part-of: pulse-notify
+data:
+  KAFKA_BROKERS: "kafka-bootstrap.kafka.svc.cluster.local:9092"
+  DB_HOST: "postgres.databases.svc.cluster.local"
+  DB_PORT: "5432"
+  DB_NAME: "pulsenotify"
+  DB_USER: "pulsenotify"
+  AWS_REGION: "us-east-1"
+  REDIS_HOST: "redis.cache.svc.cluster.local"
+  REDIS_PORT: "6379"
+  SPRING_PROFILES_ACTIVE: "prod"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-downstream-config
+  namespace: pulse-notify
+data:
+  NOTIFICATION_SERVICE_URL: "http://notification-service:8081"
+  TEMPLATE_SERVICE_URL: "http://template-service:8083"
+  USER_SERVICE_URL: "http://user-service:8084"
+  AUDIT_SERVICE_URL: "http://audit-service:8085"
