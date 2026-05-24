@@ -37,8 +37,8 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build with Maven
-        run: ./mvnw clean install -DskipTests
+      - name: Build and run unit tests
+        run: ./mvnw clean verify
 
   # --- FRONTEND ---
   frontend:
