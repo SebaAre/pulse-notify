@@ -8,7 +8,6 @@ import com.pulsenotify.audit.service.AuditEventService;
 import com.pulsenotify.events.DeliveryAttemptedEvent;
 import com.pulsenotify.events.DeliveryCompletedEvent;
 import com.pulsenotify.events.DeliveryFailedEvent;
-import com.pulsenotify.events.NotificationProcessedEvent;
 import com.pulsenotify.events.NotificationRequestedEvent;
 
 import lombok.RequiredArgsConstructor;
@@ -25,12 +24,6 @@ public class AuditEventListener {
     public void onNotificationRequestedEvent(NotificationRequestedEvent event) {
         auditEventService.persist(AuditEventMapper.from(event));
         log.info("audited NOTIFICATION_REQUESTED notificationId={}", event.getNotificationId());
-    }
-
-    @KafkaListener(topics = "notification.processed")
-    public void onNotificationProcessedEvent(NotificationProcessedEvent event) {
-        auditEventService.persist(AuditEventMapper.from(event));
-        log.info("audited NOTIFICATION_PROCESSED notificationId={}", event.getNotificationId());
     }
 
     @KafkaListener(topics = "delivery.attempted")
