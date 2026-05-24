@@ -2,9 +2,9 @@
 
 An event-driven, multi-channel notification platform built on a cloud-native microservices architecture.
 
-**Status:** runs end-to-end locally via Docker Compose. AWS infrastructure (Terraform + Kubernetes manifests) is production-grade and included as a reference deployment target — not currently provisioned.
+**Status:** runs end-to-end locally via Docker Compose. Kubernetes manifests are included for cluster deployment — not currently deployed to a managed cluster.
 
-**Stack at a glance:** Java 21 · Spring Boot 3.2 · Apache Kafka · PostgreSQL · DynamoDB · AWS SDK v2 (SES/SNS/SQS) · React 18 + TypeScript · Prometheus/Loki/Grafana · Terraform · Kubernetes.
+**Stack at a glance:** Java 21 · Spring Boot 3.2 · Apache Kafka · PostgreSQL · DynamoDB · AWS SDK v2 (SES/SNS/SQS) · React 18 + TypeScript · Prometheus/Loki/Grafana · Kubernetes.
 
 ## Architecture Overview
 
@@ -86,7 +86,7 @@ notification-service  ──► notification.requested  ──► delivery-servi
 | Templates      | Freemarker                                      |
 | Frontend       | React 18, Vite, TypeScript, TanStack Query      |
 | Observability  | Prometheus, Loki, Grafana                       |
-| Infrastructure | Terraform (EKS, RDS, MSK, DynamoDB), Kubernetes |
+| Deployment     | Kubernetes (Deployment, Service, HPA, Ingress)  |
 
 ## delivery-service Design
 
@@ -184,8 +184,7 @@ pulse-notify/
 │   └── audit-service        :8085
 ├── frontend/           # React 18 + Vite + TypeScript
 ├── infra/
-│   ├── terraform/      # AWS infrastructure (EKS, RDS, MSK, DynamoDB)
-│   ├── k8s/            # Kubernetes manifests
+│   ├── k8s/            # Kubernetes manifests (Deployment, Service, HPA per service)
 │   ├── kafka/          # Topic definitions
 │   └── docker/         # Supporting Docker configs
 ├── observability/      # Prometheus scrape config, Loki, Grafana dashboards
@@ -193,23 +192,40 @@ pulse-notify/
 └── .github/workflows/  # CI/CD pipelines
 ```
 
-## Intended Cloud Deployment
+## Kubernetes Deployment
 
-> The project runs entirely on local Docker today. The Terraform and Kubernetes manifests below describe the **intended** AWS deployment topology and are included as architectural reference — they are not actively provisioned against an account.
+> The project runs entirely on local Docker today. The Kubernetes manifests below describe the deployment topology and are ready to apply to any conformant cluster (kind, k3d, EKS, GKE, AKS) — the project is not actively running in a managed cluster.
 
-Infrastructure-as-code targets AWS: EKS for the services, RDS for PostgreSQL, MSK for Kafka, DynamoDB for the audit trail.
+Layout under `infra/k8s/`:
 
-```bash
-cd infra/terraform
-terraform init
-terraform plan -var-file=environments/prod.tfvars
-terraform apply
+```
+infra/k8s/
+├── namespace.yaml                # pulse-notify namespace
+├── configmap.yaml                # shared service-discovery config (Kafka, DB host, etc.)
+├── secrets-example.yaml          # placeholder Secret manifests — do not apply as-is
+├── ingress.yaml                  # ALB Ingress: api.pulsenotify.io → gateway, app.pulsenotify.io → frontend
+├── gateway-service/              # Deployment, Service, HPA
+├── notification-service/         # Deployment, Service, HPA
+├── delivery-service/             # Deployment, Service, HPA
+├── template-service/             # Deployment, Service, HPA
+├── user-service/                 # Deployment, Service, HPA
+├── audit-service/                # Deployment, Service, HPA
+└── frontend/                     # nginx Deployment, Service, HPA
 ```
 
-Rolling deploys via Kubernetes:
+Each service: ConfigMap envFrom for shared config, individual `secretKeyRef` for credentials, liveness/readiness probes on `/actuator/health/*`, prometheus scrape annotations, and an HPA tuned per service profile (gateway 2-12, delivery 2-15 for burst, internals 2-6).
+
+Bootstrap a cluster:
+
+```bash
+kubectl apply -f infra/k8s/namespace.yaml
+kubectl apply -f infra/k8s/configmap.yaml
+# create real Secrets (see secrets-example.yaml header for instructions)
+kubectl apply -R -f infra/k8s/
+```
+
+Rolling deploys via image tags:
 
 ```bash
 scripts/deploy.sh <staging|prod> <image-tag>
 ```
-
-See `infra/terraform/README.md` for the full AWS topology.
