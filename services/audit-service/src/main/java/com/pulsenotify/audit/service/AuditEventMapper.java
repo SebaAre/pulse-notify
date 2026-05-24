@@ -5,7 +5,6 @@ import com.pulsenotify.audit.model.AuditEvent;
 import com.pulsenotify.events.DeliveryAttemptedEvent;
 import com.pulsenotify.events.DeliveryCompletedEvent;
 import com.pulsenotify.events.DeliveryFailedEvent;
-import com.pulsenotify.events.NotificationProcessedEvent;
 import com.pulsenotify.events.NotificationRequestedEvent;
 
 public final class AuditEventMapper {
@@ -19,14 +18,6 @@ public final class AuditEventMapper {
                 .eventType("NOTIFICATION_REQUESTED")
                 .channel(event.getChannel() != null ? event.getChannel().name() : null)
                 .recipient(event.getRecipient())
-                .build();
-    }
-
-    public static AuditEvent from(NotificationProcessedEvent event) {
-        return AuditEvent.builder()
-                .notificationId(event.getNotificationId().toString())
-                .timestamp(event.getTimestamp().toString())
-                .eventType("NOTIFICATION_PROCESSED_" + (event.getStatus() != null ? event.getStatus().name() : "UNKNOWN"))
                 .build();
     }
 
