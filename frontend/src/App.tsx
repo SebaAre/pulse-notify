@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AppShell } from '@/components/layout/AppShell'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { NotificationsPage } from '@/pages/NotificationsPage'
+import { TemplatesPage } from '@/pages/TemplatesPage'
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
         <Route element={<AppShell />}>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/templates" element={<TemplatesPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
