@@ -1,7 +1,6 @@
 version: '3.9'
 
 # Local development infrastructure only — services are run directly via Maven/IDE.
-# For full-stack local testing, see docker-compose.override.yml.
 
 services:
 
