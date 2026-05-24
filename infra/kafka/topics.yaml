@@ -11,12 +11,6 @@ topics:
       retention.ms: 604800000   # 7 days
       cleanup.policy: delete
 
-  - name: notification.processed
-    partitions: 12
-    replication-factor: 3
-    config:
-      retention.ms: 604800000
-
   - name: delivery.attempted
     partitions: 12
     replication-factor: 3
