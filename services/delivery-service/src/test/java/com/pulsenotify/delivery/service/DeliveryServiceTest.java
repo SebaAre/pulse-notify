@@ -1,6 +1,8 @@
 package com.pulsenotify.delivery.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -60,6 +62,7 @@ public class DeliveryServiceTest {
         verify(deliveryEventPublisher).publishAttempted(any(DeliveryAttemptedEvent.class));
         verify(deliveryEventPublisher).publishCompleted(any(DeliveryCompletedEvent.class));
         verify(deliveryEventPublisher, never()).publishFailed(any());
+        verify(deliveryEventPublisher, never()).publishToDlq(any(), anyInt());
 
     }
 
@@ -85,6 +88,7 @@ public class DeliveryServiceTest {
         //ASSERT
         verify(deliveryEventPublisher).publishAttempted(any(DeliveryAttemptedEvent.class));
         verify(deliveryEventPublisher).publishFailed(any());
+        verify(deliveryEventPublisher).publishToDlq(eq(event), eq(1));
         verify(deliveryEventPublisher, never()).publishCompleted(any());
     }
 
@@ -108,6 +112,7 @@ public class DeliveryServiceTest {
         //ASSERT
         verify(deliveryEventPublisher).publishAttempted(any(DeliveryAttemptedEvent.class));
         verify(deliveryEventPublisher).publishFailed(any());
+        verify(deliveryEventPublisher).publishToDlq(eq(event), eq(1));
         verify(deliveryEventPublisher, never()).publishCompleted(any());
     }
 
