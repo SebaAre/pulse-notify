@@ -1,11 +1,13 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { Bell, Inbox, LayoutDashboard, Users } from 'lucide-react'
+import { Bell, FileText, History, Inbox, LayoutDashboard, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/notifications', label: 'Notifications', icon: Inbox },
+  { to: '/templates', label: 'Templates', icon: FileText },
   { to: '/users', label: 'Users', icon: Users },
+  { to: '/audit', label: 'Audit', icon: History },
 ]
 
 export function AppShell() {
