@@ -13,6 +13,9 @@ spring:
       ddl-auto: validate
   flyway:
     enabled: true
+    schemas: user_svc
+    default-schema: user_svc
+    create-schemas: true
 
 management:
   endpoints:

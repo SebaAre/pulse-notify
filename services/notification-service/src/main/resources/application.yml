@@ -16,6 +16,9 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: true
+    schemas: notification
+    default-schema: notification
+    create-schemas: true
   kafka:
     bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
     producer:
